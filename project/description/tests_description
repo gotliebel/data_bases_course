@@ -1,0 +1,14 @@
+1.1 Проверим что при rank = 1, в колонке 'location' будет 'Barcelona'.
+1.2 Проверим что при rank = 2, в колонке 'average_price' будет 350.
+
+2. Проверим что при row = 3, в колонке 'price' будет 700.
+
+3. Проверим что при location = 'Amsterdam', в колонке 'price' будет 150.
+
+4. Проверим что при location = 'Amsterdam', в колонке 'ticket_price' будет 700.
+
+5. Проверим что при city = 'Barcelona', в колонке 'max_price' будет 700.
+
+6. Проверим что при price = 200, в колонке 'row_number' будет 1.
+
+7. Проверим что при city = 'Amsterdam', в колонке 'stars' будет 3.

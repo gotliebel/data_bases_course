@@ -1,0 +1,84 @@
+image: python:3.9-slim
+
+# стейджи пайплайна
+stages:
+  - tasks # у этого стейджа есть стэпы: 'tasks from 3rd to 11th' & 'task 12th'
+
+# внутри пайплайна автоматически поднимается
+# пустая база Postgres (каждый раз на новый степ)
+services:
+  - name: postgres:15-alpine
+    alias: postgres
+
+
+
+variables:
+#  переменные окружения для Postgres
+  POSTGRES_DB: postgres
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: password
+  POSTGRES_HOST_AUTH_METHOD: trust
+
+#  переменные окружения для вспомогательного
+#  скрипта utils/pypsql.py и тестов
+  DBNAME: postgres
+  DBHOST: postgres
+  DBPORT: 5432
+  DBUSER: postgres
+  DBPASSWORD: password
+
+#  аккуратное формирование всяких абсолютных
+#  путей к файлам и директориям
+#  у вас будет ${PROJECT_DIR} тождественно равен ${CI_PROJECT_DIR}
+  PROJECT_DIR: ${CI_PROJECT_DIR}
+  ANALYSIS_DIR: ${PROJECT_DIR}/analysis
+  SCRIPTS_DIR: ${PROJECT_DIR}/scripts
+  TESTS_DIR: ${PROJECT_DIR}/tests
+  UTILS_DIR: ${PROJECT_DIR}/utils
+  PYPSQL: ${UTILS_DIR}/pypsql.py
+
+#  переменные для цвета в консоли (можете
+#  использовать какие-то другие свои)
+  NO_COLOUR: '\033[0m'
+  LIGHT_RED: '\033[1;31m'
+
+
+.setup:
+  before_script:
+    - pip install -r ${PROJECT_DIR}/requirements.txt > /dev/null 2> /dev/null
+
+
+tasks from 3rd to 7th:
+  stage: tasks
+  extends:
+    - .setup
+  script:
+    - echo -e "${LIGHT_RED}>>> Task №3 <<<${NO_COLOUR}"
+    - python3 ${PYPSQL} --file="${SCRIPTS_DIR}/tourism_ddl.sql" --cat
+
+    - echo -e "${LIGHT_RED}>>> Task №4-5 <<<${NO_COLOUR}"
+    - python3 ${PYPSQL} --file="${SCRIPTS_DIR}/tourism_inserts.sql"
+    - python3 ${PYPSQL} --file="${SCRIPTS_DIR}/tourism_crud.sql"
+
+    - echo -e "${LIGHT_RED}>>> Task №6-7 <<<${NO_COLOUR}"
+    - SCRIPT_PATH="${SCRIPTS_DIR}/tourism_1.sql" pytest ${TESTS_DIR}/test_1.py
+    - SCRIPT_PATH="${SCRIPTS_DIR}/tourism_2.sql" pytest ${TESTS_DIR}/test_2.py
+    - SCRIPT_PATH="${SCRIPTS_DIR}/tourism_3.sql" pytest ${TESTS_DIR}/test_3.py
+    - SCRIPT_PATH="${SCRIPTS_DIR}/tourism_4.sql" pytest ${TESTS_DIR}/test_4.py
+    - SCRIPT_PATH="${SCRIPTS_DIR}/tourism_5.sql" pytest ${TESTS_DIR}/test_5.py
+    - SCRIPT_PATH="${SCRIPTS_DIR}/tourism_6.sql" pytest ${TESTS_DIR}/test_6.py
+    - SCRIPT_PATH="${SCRIPTS_DIR}/tourism_7.sql" pytest ${TESTS_DIR}/test_7.py
+
+    - echo -e "${LIGHT_RED}>>> Task №9 <<<${NO_COLOUR}"
+    - SCRIPT_PATH="${SCRIPTS_DIR}/tourism_views_1.sql" pytest ${TESTS_DIR}/test_views_1.py
+    - SCRIPT_PATH="${SCRIPTS_DIR}/tourism_views_2.sql" pytest ${TESTS_DIR}/test_views_2.py
+    - SCRIPT_PATH="${SCRIPTS_DIR}/tourism_views_3.sql" pytest ${TESTS_DIR}/test_views_3.py
+    - SCRIPT_PATH="${SCRIPTS_DIR}/tourism_views_4.sql" pytest ${TESTS_DIR}/test_views_4.py
+    - SCRIPT_PATH="${SCRIPTS_DIR}/tourism_views_5.sql" pytest ${TESTS_DIR}/test_views_5.py
+    - SCRIPT_PATH="${SCRIPTS_DIR}/tourism_views_6.sql" pytest ${TESTS_DIR}/test_views_6.py
+    - SCRIPT_PATH="${SCRIPTS_DIR}/tourism_views_7.sql" pytest ${TESTS_DIR}/test_views_7.py
+
+    - echo -e "${LIGHT_RED}>>> Task №10 <<<${NO_COLOUR}"
+    - SCRIPT_PATH="${SCRIPTS_DIR}/tourism_func_1.sql" pytest ${TESTS_DIR}/test_func_1.py
+    - SCRIPT_PATH="${SCRIPTS_DIR}/tourism_func_2.sql" pytest ${TESTS_DIR}/test_func_2.py
+
